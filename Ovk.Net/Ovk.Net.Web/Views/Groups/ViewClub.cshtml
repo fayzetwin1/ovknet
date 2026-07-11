@@ -1,0 +1,46 @@
+@using Ovk.Net.Core.Models
+@model Club
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="left_small_block">
+    <div class="avatar_block">
+        <a href="#">
+            <img src="/assets/packages/static/openvk/img/camera_200.png"
+                 alt="@Model.Name"
+                 style="width: 100%; image-rendering: -webkit-optimize-contrast;" />
+        </a>
+    </div>
+</div>
+
+<div class="right_big_block">
+    <div class="page_info_main page_info_main_profile page_info">
+        <div class="accountInfo clearFix">
+            <div class="profileName">
+                <h2>@Model.Name</h2>
+                <div class="page_status">@Model.About</div>
+            </div>
+        </div>
+        <div>
+            <table id="basicInfo" class="ugc-table" border="0" cellspacing="0" cellpadding="0">
+                <tbody>
+                    <tr>
+                        <td class="label"><span class="nobold">Верифицирована: </span></td>
+                        <td class="data">@(Model.Verified ? "Да" : "Нет")</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Wall -->
+    <div class="wall_module">
+        <div class="content_title_expanded">
+            Стена группы
+        </div>
+        <div class="wall_posts">
+            <div style="padding: 15px; color: gray; text-align: center;">На стене пока нет ни одной записи.</div>
+        </div>
+    </div>
+</div>

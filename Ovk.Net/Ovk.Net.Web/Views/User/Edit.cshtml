@@ -1,0 +1,86 @@
+@model ProfileEditViewModel
+@{
+    ViewData["Title"] = "Редактирование страницы";
+    var main = Model.Mode == "main";
+    var contacts = Model.Mode == "contacts";
+    var interests = Model.Mode == "interests";
+    var avatar = Model.Mode == "avatar";
+}
+
+<div class="page-title">Редактирование страницы</div>
+<div class="tabs edit-tabs">
+    <div class="tab" id="@(main ? "activetabs" : null)"><a id="@(main ? "act_tab_a" : null)" href="/edit">Основное</a></div>
+    <div class="tab" id="@(contacts ? "activetabs" : null)"><a id="@(contacts ? "act_tab_a" : null)" href="/edit?act=contacts">Контакты</a></div>
+    <div class="tab" id="@(interests ? "activetabs" : null)"><a id="@(interests ? "act_tab_a" : null)" href="/edit?act=interests">Интересы</a></div>
+    <div class="tab" id="@(avatar ? "activetabs" : null)"><a id="@(avatar ? "act_tab_a" : null)" href="/edit?act=avatar">Фотография</a></div>
+</div>
+
+<div class="container_gray edit-container">
+    @if (TempData["ProfileSaved"] != null)
+    {
+        <div class="msg msg_succ">Изменения сохранены.</div>
+    }
+    <div asp-validation-summary="ModelOnly" class="msg msg_err"></div>
+
+    @if (main)
+    {
+        <h4>Основная информация</h4>
+        <form method="post" action="/edit?act=main">
+            @Html.AntiForgeryToken()
+            <table class="flexible_table edit-table" cellspacing="7" cellpadding="0" border="0" align="center">
+                <tbody>
+                    <tr><td width="120"><span class="nobold">Имя:</span></td><td><input asp-for="FirstName" /><span asp-validation-for="FirstName"></span></td></tr>
+                    <tr><td><span class="nobold">Фамилия:</span></td><td><input asp-for="LastName" /><span asp-validation-for="LastName"></span></td></tr>
+                    <tr><td><span class="nobold">Статус:</span></td><td><input asp-for="Status" /></td></tr>
+                    <tr><td><span class="nobold">Пол:</span></td><td><select asp-for="Sex"><option value="true">Мужской</option><option value="false">Женский</option></select></td></tr>
+                    <tr><td><span class="nobold">Родной город:</span></td><td><input asp-for="Hometown" /></td></tr>
+                    <tr><td><span class="nobold">Город:</span></td><td><input asp-for="City" /></td></tr>
+                    <tr><td></td><td><button class="button" type="submit">Сохранить</button></td></tr>
+                </tbody>
+            </table>
+        </form>
+    }
+    else if (contacts)
+    {
+        <h4>Контактная информация</h4>
+        <form method="post" action="/edit?act=contacts">
+            @Html.AntiForgeryToken()
+            <table class="flexible_table edit-table" cellspacing="7" cellpadding="0" border="0" align="center">
+                <tbody>
+                    <tr><td width="120"><span class="nobold">E-mail:</span></td><td><input asp-for="Email" /><span asp-validation-for="Email"></span></td></tr>
+                    <tr><td><span class="nobold">Телефон:</span></td><td><input asp-for="Phone" /></td></tr>
+                    <tr><td></td><td><button class="button" type="submit">Сохранить</button></td></tr>
+                </tbody>
+            </table>
+        </form>
+    }
+    else if (interests)
+    {
+        <h4>Личная информация</h4>
+        <form method="post" action="/edit?act=interests">
+            @Html.AntiForgeryToken()
+            <table class="flexible_table edit-table" cellspacing="7" cellpadding="0" border="0" align="center">
+                <tbody>
+                    <tr><td width="120" valign="top"><span class="nobold">Интересы:</span></td><td><textarea asp-for="Info" rows="5"></textarea></td></tr>
+                    <tr><td valign="top"><span class="nobold">О себе:</span></td><td><textarea asp-for="About" rows="7"></textarea></td></tr>
+                    <tr><td></td><td><button class="button" type="submit">Сохранить</button></td></tr>
+                </tbody>
+            </table>
+        </form>
+    }
+    else
+    {
+        <h4>Фотография страницы</h4>
+        <div class="avatar-editor">
+            <img src="/avatars/@Model.ProfileId" alt="Текущая фотография" />
+            <div>
+                <p>Вы можете загрузить изображение в формате JPEG, PNG, GIF или WebP размером до 10 МБ.</p>
+                <form action="/al_avatars" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input name="avatar" type="file" accept="image/jpeg,image/png,image/gif,image/webp" required />
+                    <button class="button" type="submit">Загрузить фотографию</button>
+                </form>
+            </div>
+        </div>
+    }
+</div>

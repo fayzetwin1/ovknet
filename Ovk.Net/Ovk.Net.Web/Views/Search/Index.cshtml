@@ -1,0 +1,95 @@
+@model SearchViewModel
+@{
+    ViewData["Title"] = Model.Section == "groups" ? "Поиск групп" : "Поиск людей";
+    var encodedQuery = System.Net.WebUtility.UrlEncode(Model.Query);
+    var sectionTitle = Model.Section == "groups" ? "групп" : "людей";
+}
+
+<div class="page-title">Поиск @sectionTitle</div>
+<form id="search_form" class="search-form container_gray" action="/search" method="get">
+    <input type="hidden" name="section" value="@Model.Section" />
+    <input type="search" name="q" value="@Model.Query" placeholder="Начните вводить имя, название или ключевое слово" autofocus />
+    <button class="button" type="submit">Поиск</button>
+</form>
+
+<div class="summaryBar summaryBarFlex padding">
+    <div class="summary"><b>Результатов: @Model.Count</b></div>
+</div>
+
+<div class="search-page">
+    <main class="search-results scroll_container">
+        @if (Model.Section == "users")
+        {
+            @foreach (var user in Model.Users)
+            {
+                <div class="scroll_node search-result">
+                    <a class="search-result-avatar" href="/id@user.Id"><img src="/avatars/@user.Id" alt="@user.Name" loading="lazy" /></a>
+                    <div class="search-result-info">
+                        <a href="/id@user.Id"><b>@user.Name</b></a>
+                        @if (user.Verified) { <img class="name-checkmark" src="/assets/packages/static/openvk/img/checkmark.png" alt="Подтверждённая страница" /> }
+                        @if (user.Online) { <span class="search-online">онлайн</span> }
+                        <table class="ugc-table"><tbody>
+                            <tr><td class="label">ID:</td><td>@user.Id</td></tr>
+                            <tr><td class="label">Пол:</td><td>@(user.Sex ? "Мужской" : "Женский")</td></tr>
+                            @if (!string.IsNullOrWhiteSpace(user.City)) { <tr><td class="label">Город:</td><td>@user.City</td></tr> }
+                            @if (!string.IsNullOrWhiteSpace(user.Status)) { <tr><td class="label">Статус:</td><td>@user.Status</td></tr> }
+                            <tr><td class="label">Регистрация:</td><td>@user.Since.ToString("d MMMM yyyy")</td></tr>
+                        </tbody></table>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            @foreach (var group in Model.Groups)
+            {
+                <div class="scroll_node search-result">
+                    <a class="search-result-avatar" href="/club@group.Id"><img src="/assets/packages/static/openvk/img/camera_200.png" alt="@group.Name" loading="lazy" /></a>
+                    <div class="search-result-info">
+                        <a href="/club@group.Id"><b>@group.Name</b></a>
+                        @if (group.Verified) { <img class="name-checkmark" src="/assets/packages/static/openvk/img/checkmark.png" alt="Подтверждённая группа" /> }
+                        <table class="ugc-table"><tbody>
+                            <tr><td class="label">ID:</td><td>@group.Id</td></tr>
+                            <tr><td class="label">Участники:</td><td>@group.Members</td></tr>
+                            @if (!string.IsNullOrWhiteSpace(group.About)) { <tr><td class="label">Описание:</td><td>@group.About</td></tr> }
+                        </tbody></table>
+                    </div>
+                </div>
+            }
+        }
+
+        @if (Model.Count == 0)
+        {
+            <div class="empty-state"><b>Ничего не найдено</b><span>Попробуйте изменить поисковый запрос.</span></div>
+        }
+    </main>
+
+    <aside class="search-sidebar">
+        <nav class="verticalGrayTabs">
+            <a id="@(Model.Section == "users" ? "used" : null)" href="/search?section=users&q=@encodedQuery">Люди</a>
+            <a id="@(Model.Section == "groups" ? "used" : null)" href="/search?section=groups&q=@encodedQuery">Группы</a>
+        </nav>
+
+        @if (Model.Section == "users")
+        {
+            <div class="search-filters">
+                <b>Основное</b>
+                <input type="text" name="city" value="@Model.City" form="search_form" placeholder="Город" />
+                <label><input type="checkbox" name="is_online" value="true" checked="@Model.OnlineOnly" form="search_form" /> Сейчас на сайте</label>
+                <b>Пол</b>
+                <label><input type="radio" name="gender" value="0" checked="@(Model.Gender == 0)" form="search_form" /> Мужской</label>
+                <label><input type="radio" name="gender" value="1" checked="@(Model.Gender == 1)" form="search_form" /> Женский</label>
+                <label><input type="radio" name="gender" value="3" checked="@(Model.Gender is not 0 and not 1)" form="search_form" /> Любой</label>
+            </div>
+        }
+    </aside>
+</div>
+
+@if (Model.TotalPages > 1)
+{
+    <div class="search-pagination">
+        @if (Model.Page > 1) { <a href="/search?section=@Model.Section&q=@encodedQuery&p=@(Model.Page - 1)">← Назад</a> }
+        <span>Страница @Model.Page из @Model.TotalPages</span>
+        @if (Model.Page < Model.TotalPages) { <a href="/search?section=@Model.Section&q=@encodedQuery&p=@(Model.Page + 1)">Вперёд →</a> }
+    </div>
+}

@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Ovk.Net.Core/Ovk.Net.Core.csproj" />
+  <Project Path="Ovk.Net.Infrastructure/Ovk.Net.Infrastructure.csproj" />
+  <Project Path="Ovk.Net.Web/Ovk.Net.Web.csproj" />
+</Solution>

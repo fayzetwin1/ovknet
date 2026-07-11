@@ -1,0 +1,63 @@
+@model ImIndexViewModel
+@{
+    ViewData["Title"] = "Мои сообщения";
+}
+
+<div class="page-title">Мои сообщения</div>
+<div class="tabs">
+    <div id="activetabs" class="tab"><a id="act_tab_a" href="/im">Все сообщения</a></div>
+</div>
+
+<div class="container_gray im-search">
+    <form action="/im/search" method="post">
+        @Html.AntiForgeryToken()
+        <input type="search" name="pattern" placeholder="Поиск сообщений" required />
+    </form>
+</div>
+
+@if (Model.Dialogs.Count > 0)
+{
+    <div class="crp-list scroll_container asp-crp-list">
+        @foreach (var dialog in Model.Dialogs)
+        {
+            var lastMessage = dialog.LastMessage;
+            <div class="scroll_node crp-entry" role="link" tabindex="0" data-href="/im?sel=@dialog.PeerId">
+                <div class="crp-entry--image">
+                    <img src="@dialog.PeerAvatarUrl" alt="Фотография пользователя" loading="lazy" />
+                </div>
+                <div class="crp-entry--info">
+                    <a href="@dialog.PeerUrl">@dialog.PeerName</a><br />
+                    <span>@lastMessage.SentText</span>
+                </div>
+                <div class="crp-entry--message @(dialog.UnreadCount > 0 ? "unread" : null)">
+                    @if (lastMessage.IsMine)
+                    {
+                        <div class="crp-entry--message---av"><img src="/avatars/@Model.CurrentProfile.Id" alt="Вы" /></div>
+                    }
+                    <div class="crp-entry--message---text">@lastMessage.Content</div>
+                    @if (dialog.UnreadCount > 0)
+                    {
+                        <span class="dialog-unread">+@dialog.UnreadCount</span>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="empty-state">
+        <img src="/assets/packages/static/openvk/img/messages.svg" alt="" />
+        <b>У вас пока нет сообщений</b>
+        <span>Начните диалог со страницы другого пользователя.</span>
+    </div>
+}
+
+@if (Model.TotalPages > 1)
+{
+    <div class="summaryBar"><div class="summary">
+        @if (Model.HasPreviousPage) { <a href="/im?p=@(Model.Page - 1)">← Назад</a> }
+        <span>Страница @Model.Page из @Model.TotalPages</span>
+        @if (Model.HasNextPage) { <a href="/im?p=@(Model.Page + 1)">Вперёд →</a> }
+    </div></div>
+}

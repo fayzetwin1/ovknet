@@ -1,0 +1,27 @@
+@model Ovk.Net.Web.Models.SidebarViewModel
+
+@if (Model.Profile != null)
+{
+    <a href="/id@(Model.Profile.Id)" class="link my_page">Моя Страница</a>
+    <a href="/friends@(Model.Profile.Id)" class="link my_friends">Мои Друзья</a>
+    <a href="/im" class="link my_messages">
+        Мои Сообщения
+        @if (Model.UnreadMessages > 0)
+        {
+            <text> (<b>@Model.UnreadMessages</b>)</text>
+        }
+    </a>
+    <a href="/groups@(Model.Profile.Id)" class="link my_groups">Мои Группы</a>
+    <a href="/settings" class="link my_settings">Настройки</a>
+}
+else
+{
+    <form id="fastLogin" action="/Auth/Login" method="POST">
+        <label for="login"><span>E-mail:</span></label>
+        <input id="login" type="text" name="login" required />
+        <label for="password"><span>Пароль:</span></label>
+        <input id="password" type="password" name="password" required />
+        <input type="submit" value="Войти" class="button" style="display: inline-block; font-family: Tahoma" />
+        <a href="/Auth/Register"><input type="button" value="Регистрация" class="button" style="font-family: Tahoma" /></a><br><br>
+    </form>
+}

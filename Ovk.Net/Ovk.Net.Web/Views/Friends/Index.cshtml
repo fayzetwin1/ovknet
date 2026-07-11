@@ -1,0 +1,164 @@
+@using Ovk.Net.Web.Models
+@model FriendListViewModel
+@{
+    var profile = Model.TargetProfile;
+    var basePath = $"/friends{profile.Id}";
+    var requestTabsActive = Model.Mode is "incoming" or "followers" or "outcoming";
+    ViewData["Title"] = Model.IsCurrentUser ? "Мои друзья" : $"{Model.ModeTitle} {profile.FirstName}";
+}
+
+<div class="page-title">
+    @if (Model.IsCurrentUser)
+    {
+        <text>Мои друзья</text>
+    }
+    else
+    {
+        <a href="/id@(profile.Id)">@profile.FirstName @profile.LastName</a>
+        <text> » @Model.ModeTitle</text>
+    }
+</div>
+
+<div class="tabs">
+    <div id="@(Model.Mode == "friends" ? "activetabs" : "ki")" class="tab">
+        <a id="@(Model.Mode == "friends" ? "act_tab_a" : "ki")" href="@basePath">Все друзья</a>
+    </div>
+    <div id="@(Model.Mode == "online" ? "activetabs" : "ki")" class="tab">
+        <a id="@(Model.Mode == "online" ? "act_tab_a" : "ki")" href="@(basePath + "?act=online")">Онлайн</a>
+    </div>
+    @if (Model.IsCurrentUser)
+    {
+        <div id="@(requestTabsActive ? "activetabs" : "ki")" class="tab">
+            <a id="@(requestTabsActive ? "act_tab_a" : "ki")" href="@(basePath + "?act=incoming")">Заявки</a>
+        </div>
+    }
+</div>
+
+@if (Model.IsCurrentUser && requestTabsActive)
+{
+    <div class="mb_tabs">
+        <div id="@(Model.Mode == "incoming" ? "active" : "ki")" class="mb_tab">
+            <div><a href="@(basePath + "?act=incoming")">Входящие</a></div>
+        </div>
+        <div id="@(Model.Mode == "followers" ? "active" : "ki")" class="mb_tab">
+            <div><a href="@(basePath + "?act=followers")">Подписчики</a></div>
+        </div>
+        <div id="@(Model.Mode == "outcoming" ? "active" : "ki")" class="mb_tab">
+            <div><a href="@(basePath + "?act=outcoming")">Исходящие</a></div>
+        </div>
+    </div>
+}
+
+<div style="padding-bottom: 0px;" class="summaryBar">
+    <div class="summary">
+        @Model.ModeTitle: @Model.Count
+    </div>
+</div>
+
+<div class="content_list">
+    @if (Model.Friends.Count > 0)
+    {
+        foreach (var friend in Model.Friends)
+        {
+            <div class="cl_element" style="padding: 10px; border-bottom: 1px solid #ccc; min-height: 80px;">
+                <div class="cl_avatar" style="display: inline-block; vertical-align: top;">
+                    <a href="/id@(friend.Id)">
+                        <img class="ava" src="@friend.MinisculeAvatarUrl" width="75" alt="Фотография пользователя" loading="lazy" />
+                    </a>
+                </div>
+                <div style="display: inline-block; margin-left: 10px; max-width: 390px;">
+                    <a href="/id@(friend.Id)" class="cl_name">
+                        <b>@friend.FullName</b>
+                        @if (friend.IsVerified)
+                        {
+                            <img class="name-checkmark" src="/assets/packages/static/openvk/img/checkmark.png" alt="Подтверждённая страница" />
+                        }
+                    </a>
+                    @if (friend.IsOnline)
+                    {
+                        <div style="color: #587; font-size: 11px;">онлайн</div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(friend.Status))
+                    {
+                        <div style="color: gray; font-size: 11px;">@friend.Status</div>
+                    }
+                    <div style="color: gray; font-size: 11px;">Регистрация: @friend.Since.ToString("d MMMM yyyy")</div>
+                </div>
+
+                @if (Model.IsCurrentUser && friend.Id != Model.CurrentProfileId)
+                {
+                    <div style="float: right; width: 150px;">
+                        @switch (friend.SubscriptionStatus)
+                        {
+                            case UserSubscriptionStatus.Incoming:
+                                <form action="/setSub/user" method="post" class="profile_link_form">
+                                    <input type="hidden" name="act" value="add" />
+                                    <input type="hidden" name="id" value="@friend.Id" />
+                                    <input type="submit" class="profile_link" value="Принять заявку" />
+                                </form>
+                                @if (Model.Mode != "followers")
+                                {
+                                    <form action="/setSub/user" method="post" class="profile_link_form">
+                                        <input type="hidden" name="act" value="rej" />
+                                        <input type="hidden" name="id" value="@friend.Id" />
+                                        <input type="submit" class="profile_link" value="Оставить в подписчиках" />
+                                    </form>
+                                }
+                                break;
+                            case UserSubscriptionStatus.Outgoing:
+                                <form action="/setSub/user" method="post" class="profile_link_form">
+                                    <input type="hidden" name="act" value="rem" />
+                                    <input type="hidden" name="id" value="@friend.Id" />
+                                    <input type="submit" class="profile_link" value="Отменить заявку" />
+                                </form>
+                                break;
+                            case UserSubscriptionStatus.Mutual:
+                                <a href="/im?sel=@friend.Id" class="profile_link" rel="nofollow">Написать</a>
+                                <form action="/setSub/user" method="post" class="profile_link_form">
+                                    <input type="hidden" name="act" value="rem" />
+                                    <input type="hidden" name="id" value="@friend.Id" />
+                                    <input type="submit" class="profile_link" value="Удалить из друзей" />
+                                </form>
+                                break;
+                            default:
+                                <form action="/setSub/user" method="post" class="profile_link_form">
+                                    <input type="hidden" name="act" value="add" />
+                                    <input type="hidden" name="id" value="@friend.Id" />
+                                    <input type="submit" class="profile_link" value="Добавить в друзья" />
+                                </form>
+                                break;
+                        }
+                    </div>
+                }
+            </div>
+        }
+    }
+    else
+    {
+        <div style="padding: 15px; text-align: center; color: gray;">@Model.EmptyText</div>
+    }
+</div>
+
+@if (Model.TotalPages > 1)
+{
+    var previousUrl = Model.Mode == "friends"
+        ? $"{basePath}?p={Model.Page - 1}"
+        : $"{basePath}?act={Model.Mode}&p={Model.Page - 1}";
+    var nextUrl = Model.Mode == "friends"
+        ? $"{basePath}?p={Model.Page + 1}"
+        : $"{basePath}?act={Model.Mode}&p={Model.Page + 1}";
+
+    <div class="summaryBar" style="margin-top: 8px;">
+        <div class="summary">
+            @if (Model.HasPreviousPage)
+            {
+                <a href="@previousUrl">← Назад</a>
+            }
+            <span>Страница @Model.Page из @Model.TotalPages</span>
+            @if (Model.HasNextPage)
+            {
+                <a href="@nextUrl">Вперёд →</a>
+            }
+        </div>
+    </div>
+}

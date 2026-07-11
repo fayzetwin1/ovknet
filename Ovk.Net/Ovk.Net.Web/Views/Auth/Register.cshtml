@@ -1,0 +1,46 @@
+@{
+    ViewData["Title"] = "Регистрация";
+}
+
+<form method="POST" action="/Auth/Register" enctype="multipart/form-data">
+    <h4 class="reg_h4">Регистрация</h4>
+    <table class="flexible_table auth_table" cellspacing="7" cellpadding="0" width="46%" border="0" align="center">
+        <tbody>
+            <tr style="text-align: right;">
+                <td>
+                    <span class="nobold">Имя: </span>
+                </td>
+                <td style="width:191px;">
+                    <input type="text" name="firstName" required />
+                </td>
+            </tr>
+            <tr style="text-align: right;">
+                <td>
+                    <span class="nobold">Фамилия: </span>
+                </td>
+                <td>
+                    <input type="text" name="lastName" required />
+                </td>
+            </tr>
+            <tr style="text-align: right;">
+                <td>
+                    <span class="nobold">E-mail: </span>
+                </td>
+                <td>
+                    <input type="email" name="login" required />
+                </td>
+            </tr>
+            <tr style="text-align: right;">
+                <td>
+                    <span class="nobold">Пароль: </span>
+                </td>
+                <td>
+                    <input type="password" name="password" required />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <center>
+        <input type="submit" value="Зарегистрироваться" class="button" />
+    </center>
+</form>

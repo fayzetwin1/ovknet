@@ -1,0 +1,30 @@
+# Старый OpenVK на PHP и Chandler держим рядом только как донор кода.
+# В новый ASP.NET-репозиторий это добро не тащим.
+/php/
+/chandler/
+/.legacy-git/
+
+# Сборка .NET
+**/bin/
+**/obj/
+
+# Локальные ключи и настройки разработки
+**/.data-protection-keys/
+appsettings.Local.json
+appsettings.*.Local.json
+*.user
+*.suo
+
+# IDE и ОС
+.vs/
+.vscode/
+.idea/
+*.swp
+*.tmp
+Thumbs.db
+Desktop.ini
+
+# Логи и локальные загрузки
+*.log
+Ovk.Net/Ovk.Net.Web/Logs/
+php/storage/

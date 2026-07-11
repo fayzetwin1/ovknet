@@ -1,0 +1,35 @@
+@model AboutViewModel
+@{
+    ViewData["Title"] = "О сайте";
+}
+
+<div class="page-title">Об этом сайте</div>
+<div class="information-page">
+    <table class="flexible_table" width="100%" cellspacing="0" cellpadding="0">
+        <tbody><tr valign="top">
+            <td width="290" class="about-column">
+                <h4>Статистика</h4>
+                <p>На этом экземпляре OpenVK:</p>
+                <ul>
+                    <li><span>пользователей — <b>@Model.Users</b></span></li>
+                    <li><span>сейчас онлайн — <b>@Model.OnlineUsers</b></span></li>
+                    <li><span>активных за 30 дней — <b>@Model.ActiveUsers</b></span></li>
+                    <li><span>групп — <b>@Model.Groups</b></span></li>
+                    <li><span>записей на стенах — <b>@Model.Posts</b></span></li>
+                </ul>
+            </td>
+            <td>
+                <h4>OpenVK</h4>
+                <p><b>OpenVK — свободная социальная сеть, вдохновлённая классическим интерфейсом ВКонтакте.</b></p>
+                <p>Здесь можно находить друзей и знакомых, общаться, вступать в группы и публиковать записи.</p>
+                <ul>
+                    <li><a href="/about:openvk">Версия и лицензия</a></li>
+                    <li><a href="/privacy">Политика конфиденциальности</a></li>
+                    <li><a href="/support">Помощь</a></li>
+                </ul>
+            </td>
+        </tr></tbody>
+    </table>
+    <h4>Правила</h4>
+    <p>С правилами сайта можно ознакомиться <a href="/terms">здесь</a>.</p>
+</div>

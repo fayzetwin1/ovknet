@@ -1,0 +1,92 @@
+@inject Ovk.Net.Web.Services.IChandlerContext LayoutChandlerContext
+@{
+    var layoutProfile = await LayoutChandlerContext.GetProfileAsync();
+}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            @ViewData["Title"] - Ovk.Net
+        </title>
+        <meta charset="utf-8" />
+        <link rel="shortcut icon" href="~/assets/packages/static/openvk/img/icon.ico" />
+        <meta name="application-name" content="Ovk.Net" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        <script src="~/assets/packages/static/openvk/js/node_modules/jquery/dist/jquery.min.js"></script>
+        <script src="~/assets/packages/static/openvk/js/node_modules/jquery-ui/dist/jquery-ui.min.js"></script>
+
+        <link rel="stylesheet" href="~/assets/packages/static/openvk/css/main.css" />
+        <link rel="stylesheet" href="~/assets/packages/static/openvk/css/bsdn.css" />
+        <link rel="stylesheet" href="~/assets/packages/static/openvk/css/dialog.css" />
+        <link rel="stylesheet" href="~/assets/packages/static/openvk/css/mobile.css" />
+        @if (layoutProfile?.StyleAvatar == 1)
+        {
+            <link rel="stylesheet" href="~/assets/packages/static/openvk/css/avatar.1.css" />
+        }
+        else if (layoutProfile?.StyleAvatar == 2)
+        {
+            <link rel="stylesheet" href="~/assets/packages/static/openvk/css/avatar.2.css" />
+        }
+        <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    </head>
+    <body data-themepack="ovk">
+        <div class="notifications_global_wrap"></div>
+        <div class="dimmer">
+            <div id='clickable'></div>
+        </div>
+
+        <div class="layout">
+            <div id="xhead" class="dm"></div>
+            <div class="page_header">
+                <a href="/" class="home_button" title="OpenVK"></a>
+                <div class="mobile_title">
+                    <span>@ViewData["Title"]</span>
+                </div>
+                
+                <div class="header_navigation">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <div class="link link_long_screens"><a href="/">Главная</a></div>
+                        <div class="link"><a href="/search">Поиск</a></div>
+                        <div class="link"><a id="logout_link" href="/Auth/Logout">Выйти</a></div>
+                    }
+                    else
+                    {
+                        <div class="link"><a href="/Auth/Login">Вход</a></div>
+                        <div class="link"><a href="/Auth/Register">Регистрация</a></div>
+                        <div class="link"><a href="/support">Помощь</a></div>
+                    }
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="navigation">
+                    @await Component.InvokeAsync("Sidebar")
+                </div>
+            </div>
+
+            <div class="page_body">
+                <div class="wrap2">
+                    <div class="wrap1">
+                        <div id="auth" class="page-wrap">
+                            <div class="page_content">
+                                @RenderBody()
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page_footer">
+            <div class="navigation_footer">
+                <a href="/about" class="link">О сайте</a>
+                <a href="/terms" class="link">Правила</a>
+                <a href="/support" class="link">Помощь</a>
+            </div>
+            <p>OpenVK <a href="/about:openvk">ASP.NET Core Port</a></p>
+        </div>
+        <script src="~/js/site.js" asp-append-version="true"></script>
+    </body>
+</html>

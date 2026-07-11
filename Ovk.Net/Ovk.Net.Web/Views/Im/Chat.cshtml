@@ -1,0 +1,54 @@
+@model ImChatViewModel
+@{
+    ViewData["Title"] = Model.PeerName;
+}
+
+<div class="page-title im-chat-title">
+    <a href="/im">Мои сообщения</a> &raquo; <a href="@Model.PeerUrl">@Model.PeerName</a>
+    <span>@Model.PeerLastSeenText</span>
+</div>
+
+<div class="messenger-app asp-messenger-app">
+    <div class="messenger-app--messages" id="chat_history">
+        @if (Model.Messages.Count > 0)
+        {
+            @foreach (var message in Model.Messages)
+            {
+                <div class="messenger-app--messages---message @(message.IsUnread ? "unread" : null)">
+                    <a href="@message.SenderUrl"><img class="ava" src="@message.SenderAvatarUrl" alt="@message.SenderName" /></a>
+                    <div class="_content">
+                        <a href="@message.SenderUrl"><b>@message.SenderName</b></a>
+                        <span class="message-text">@message.Content</span>
+                    </div>
+                    <span class="time">@message.SentText</span>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="empty-state compact"><b>Нет сообщений</b><span>Напишите первым.</span></div>
+        }
+    </div>
+
+    <div class="messenger-app--input">
+        @if (Model.CanWrite)
+        {
+            <img class="ava" src="/avatars/@Model.CurrentProfile.Id" alt="Вы" />
+            <form class="messenger-app--input---messagebox" action="/im/send" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="peerId" value="@Model.PeerProfile.Id" />
+                <textarea name="content" placeholder="Введите сообщение..." maxlength="10000" required autofocus></textarea>
+                <button type="submit" class="button">Отправить</button>
+            </form>
+        }
+        else
+        {
+            <div class="blocked" data-localized-text="Пользователь ограничил получение сообщений"></div>
+        }
+    </div>
+</div>
+
+<script>
+    const history = document.getElementById("chat_history");
+    if (history) history.scrollTop = history.scrollHeight;
+</script>

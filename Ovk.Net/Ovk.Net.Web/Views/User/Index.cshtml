@@ -1,0 +1,282 @@
+@using Ovk.Net.Web.Models
+@model UserProfileViewModel
+@{
+    ViewData["Title"] = $"{Model.Profile.FirstName} {Model.Profile.LastName}";
+}
+
+<div class="left_small_block">
+    <div class="avatar_block">
+        @if (Model.IsCurrentUser)
+        {
+            <div class="avatar_controls">
+                <form action="/al_avatars" method="post" enctype="multipart/form-data" class="avatar_upload_form">
+                    @Html.AntiForgeryToken()
+                    <label for="avatar_file" class="avatar_upload_button">Обновить фотографию</label>
+                    <input id="avatar_file" name="avatar" type="file" accept="image/jpeg,image/png,image/gif,image/webp" />
+                </form>
+                <form action="/delete_avatar" method="post" class="avatar_delete_form">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" title="Удалить фотографию">×</button>
+                </form>
+            </div>
+        }
+        <a href="@Model.NormalAvatarUrl" target="_blank">
+            <img src="@Model.NormalAvatarUrl"
+                 alt="@Model.Profile.FirstName @Model.Profile.LastName"
+                 id="bigAvatar"
+                 style="width: 100%; image-rendering: -webkit-optimize-contrast;" />
+        </a>
+    </div>
+    @if (Context.Request.Query.ContainsKey("avatarError"))
+    {
+        <div class="msg msg_err avatar_error">Не удалось загрузить фотографию. Разрешены JPEG, PNG, GIF и WebP до 10 МБ.</div>
+    }
+    
+    <div id="profile_links">
+        @if (Model.IsCurrentUser)
+        {
+            <div id="profile_link" style="width: 194px;">
+                <a href="/edit" class="link">Редактировать страницу</a>
+            </div>
+        }
+        else
+        {
+            @if (Model.CanSendMessage)
+            {
+                <a style="width: 194px;" href="/im?sel=@Model.Profile.Id" class="profile_link" rel="nofollow">Отправить сообщение</a>
+            }
+            
+            @switch (Model.SubscriptionStatus)
+            {
+                case UserSubscriptionStatus.Mutual:
+                    <form action="/setSub/user" method="post" class="profile_link_form">
+                        <input type="hidden" name="act" value="rem" />
+                        <input type="hidden" name="id" value="@Model.Profile.Id" />
+                        <input type="submit" class="profile_link" value="Удалить из друзей" style="width: 194px;" />
+                    </form>
+                    break;
+                case UserSubscriptionStatus.Incoming:
+                    <form action="/setSub/user" method="post" class="profile_link_form">
+                        <input type="hidden" name="act" value="add" />
+                        <input type="hidden" name="id" value="@Model.Profile.Id" />
+                        <input type="submit" class="profile_link" value="Принять заявку" style="width: 194px;" />
+                    </form>
+                    <form action="/setSub/user" method="post" class="profile_link_form">
+                        <input type="hidden" name="act" value="rej" />
+                        <input type="hidden" name="id" value="@Model.Profile.Id" />
+                        <input type="submit" class="profile_link" value="Оставить в подписчиках" style="width: 194px;" />
+                    </form>
+                    break;
+                case UserSubscriptionStatus.Outgoing:
+                    <form action="/setSub/user" method="post" class="profile_link_form">
+                        <input type="hidden" name="act" value="rem" />
+                        <input type="hidden" name="id" value="@Model.Profile.Id" />
+                        <input type="submit" class="profile_link" value="Отменить заявку" style="width: 194px;" />
+                    </form>
+                    break;
+                default:
+                    <form action="/setSub/user" method="post" class="profile_link_form">
+                        <input type="hidden" name="act" value="add" />
+                        <input type="hidden" name="id" value="@Model.Profile.Id" />
+                        <input type="submit" class="profile_link" value="Добавить в друзья" style="width: 194px;" />
+                    </form>
+                    break;
+            }
+        }
+    </div>
+
+    @if (Model.FriendsCount > 0)
+    {
+        <div class="content_title_expanded">Друзья</div>
+        <div>
+            <div class="content_subtitle">
+                Друзья (@Model.FriendsCount)
+                <div style="float:right;"><a href="/friends@(Model.Profile.Id)">все</a></div>
+            </div>
+            <div class="content_list hide_on_mobiles">
+                @foreach (var friend in Model.Friends)
+                {
+                    <div class="cl_element">
+                        <div class="cl_avatar">
+                            <a href="/id@(friend.Id)">
+                                <img class="ava" src="@friend.MinisculeAvatarUrl" />
+                            </a>
+                        </div>
+                        <a href="/id@(friend.Id)" class="cl_name">
+                            <text class="cl_fname">@friend.FirstName</text>
+                            <text class="cl_lname">@friend.LastName</text>
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    @if (Model.FriendsOnline.Count > 0)
+    {
+        <div class="content_title_expanded">Друзья онлайн</div>
+        <div>
+            <div class="content_subtitle">
+                Друзья онлайн (@Model.FriendsOnline.Count)
+                <div style="float:right;"><a href="/friends@(Model.Profile.Id)?act=online">все</a></div>
+            </div>
+            <div class="hide_on_mobiles content_list">
+                @foreach (var friend in Model.FriendsOnline)
+                {
+                    <div class="cl_element">
+                        <div class="cl_avatar">
+                            <a href="/id@(friend.Id)">
+                                <img class="ava" src="@friend.MinisculeAvatarUrl" />
+                            </a>
+                        </div>
+                        <a href="/id@(friend.Id)" class="cl_name">
+                            <text class="cl_fname">@friend.FirstName</text>
+                            <text class="cl_lname">@friend.LastName</text>
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<div class="right_big_block">
+    <div class="page_info_main page_info_main_profile page_info">
+        <div class="accountInfo clearFix">
+            <div class="profileName">
+                <h2>@Model.Profile.FirstName @Model.Profile.LastName</h2>
+                @if (Model.Profile.Verified)
+                {
+                    <img class="name-checkmark" src="/assets/packages/static/openvk/img/checkmark.png" alt="Подтверждённая страница" />
+                }
+                @if (!string.IsNullOrEmpty(Model.Profile.Status))
+                {
+                    <div class="page_status" id="page_status_text">@Model.Profile.Status</div>
+                }
+                else if (Model.IsCurrentUser)
+                {
+                    <div class="page_status">
+                        <div class="edit_link" id="page_status_text">[ изменить статус ]</div>
+                    </div>
+                }
+            </div>
+        </div>
+        <div>
+            <table id="basicInfo" class="ugc-table" border="0" cellspacing="0" cellpadding="0">
+                <tbody>
+                    <tr>
+                        <td class="label"><span class="nobold">Пол: </span></td>
+                        <td class="data">@(Model.Profile.Sex ? "Мужской" : "Женский")</td>
+                    </tr>
+                    <tr>
+                        <td class="label"><span class="nobold">Регистрация: </span></td>
+                        <td class="data">@Model.Profile.Since.ToString("d MMMM yyyy")</td>
+                    </tr>
+                    @if (!string.IsNullOrEmpty(Model.Profile.Hometown))
+                    {
+                        <tr>
+                            <td class="label"><span class="nobold">Родной город:</span></td>
+                            <td class="data">@Model.Profile.Hometown</td>
+                        </tr>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.Profile.City))
+                    {
+                        <tr>
+                            <td class="label"><span class="nobold">Город:</span></td>
+                            <td class="data">@Model.Profile.City</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Profile.Info) || !string.IsNullOrWhiteSpace(Model.Profile.About))
+    {
+        <div class="profile_information">
+            <div class="content_title_expanded">Информация</div>
+            <table class="ugc-table profile_information_table" border="0" cellspacing="0" cellpadding="0">
+                <tbody>
+                    @if (!string.IsNullOrWhiteSpace(Model.Profile.Info))
+                    {
+                        <tr><td class="label">Интересы:</td><td class="data">@Model.Profile.Info</td></tr>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.Profile.About))
+                    {
+                        <tr><td class="label">О себе:</td><td class="data profile_about">@Model.Profile.About</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <!-- Wall -->
+    <div class="wall_module">
+        <div class="content_title_expanded">
+            Стена
+        </div>
+        
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <div class="wall_post_form content_subtitle">
+                <form id="wallForm">
+                    <input type="hidden" id="wallId" name="wallId" value="@Model.Profile.Id" />
+                    <textarea id="wallContent" name="content" class="small-textarea" placeholder="Что у вас нового?" maxlength="10000"></textarea>
+                    <div class="wall_post_actions"><button type="submit" class="button">Отправить</button></div>
+                </form>
+            </div>
+        }
+
+        <div class="wall_posts" id="wall_posts_container">
+            @if(Model.Posts.Count > 0)
+            {
+                foreach(var post in Model.Posts)
+                {
+                    @await Html.PartialAsync("_Post", post)
+                }
+            }
+            else
+            {
+                <div id="no_posts_msg" style="padding: 15px; color: gray; text-align: center;">На стене пока нет ни одной записи.</div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var form = document.getElementById("wallForm");
+        if (form) {
+            form.addEventListener("submit", function (e) {
+                e.preventDefault();
+                
+                var wallId = document.getElementById("wallId").value;
+                var content = document.getElementById("wallContent").value;
+                
+                if (!content.trim()) return;
+
+                var formData = new FormData();
+                formData.append("wallId", wallId);
+                formData.append("content", content);
+
+                fetch("/api/wall/add", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error("Network error");
+                    return response.text();
+                })
+                .then(html => {
+                    var noPostsMsg = document.getElementById("no_posts_msg");
+                    if (noPostsMsg) noPostsMsg.style.display = "none";
+
+                    var postsContainer = document.getElementById("wall_posts_container");
+                    postsContainer.insertAdjacentHTML("afterbegin", html);
+                    document.getElementById("wallContent").value = "";
+                })
+                .catch(err => console.error(err));
+            });
+        }
+    });
+</script>

@@ -1,0 +1,102 @@
+@model SettingsViewModel
+@{
+    ViewData["Title"] = "Мои настройки";
+    var main = Model.Mode == "main";
+    var security = Model.Mode == "security";
+    var ui = Model.Mode == "interface";
+}
+
+<div class="page-title">Мои настройки</div>
+<div class="tabs">
+    <div class="tab" id="@(main ? "activetabs" : null)"><a id="@(main ? "act_tab_a" : null)" href="/settings">Основное</a></div>
+    <div class="tab" id="@(security ? "activetabs" : null)"><a id="@(security ? "act_tab_a" : null)" href="/settings?act=security">Безопасность</a></div>
+    <div class="tab" id="@(ui ? "activetabs" : null)"><a id="@(ui ? "act_tab_a" : null)" href="/settings?act=interface">Интерфейс</a></div>
+</div>
+
+<div class="container_gray settings-container">
+    @if (TempData["SettingsSaved"] != null)
+    {
+        <div class="msg msg_succ">Изменения сохранены.</div>
+    }
+    @if (TempData["SettingsError"] is string error)
+    {
+        <div class="msg msg_err">@error</div>
+    }
+
+    @if (main)
+    {
+        <h4>Адрес вашей страницы</h4>
+        <form action="/settings/general" method="post">
+            @Html.AntiForgeryToken()
+            <table class="flexible_table settings-table" cellspacing="7" cellpadding="0" border="0" align="center">
+                <tbody>
+                    <tr><td width="145"><span class="nobold">ID страницы:</span></td><td>@Model.ProfileId</td></tr>
+                    <tr><td><span class="nobold">Короткий адрес:</span></td><td><input name="shortcode" value="@Model.Shortcode" placeholder="username" /></td></tr>
+                    <tr><td></td><td><span class="settings-hint">localhost:5038/<b>@(Model.Shortcode ?? $"id{Model.ProfileId}")</b></span></td></tr>
+                    <tr><td></td><td><button type="submit" class="button">Сохранить</button></td></tr>
+                </tbody>
+            </table>
+        </form>
+    }
+    else if (security)
+    {
+        <h4>Изменение пароля</h4>
+        <form action="/settings/password" method="post">
+            @Html.AntiForgeryToken()
+            <table class="flexible_table settings-table" cellspacing="7" cellpadding="0" border="0" align="center">
+                <tbody>
+                    <tr><td width="145"><span class="nobold">Текущий пароль:</span></td><td><input type="password" name="oldPassword" autocomplete="current-password" required /></td></tr>
+                    <tr><td><span class="nobold">Новый пароль:</span></td><td><input type="password" name="newPassword" autocomplete="new-password" minlength="8" required /></td></tr>
+                    <tr><td><span class="nobold">Повторите пароль:</span></td><td><input type="password" name="repeatPassword" autocomplete="new-password" minlength="8" required /></td></tr>
+                    <tr><td></td><td><button type="submit" class="button">Изменить пароль</button></td></tr>
+                </tbody>
+            </table>
+        </form>
+
+        <h4 class="settings-section">Активные сессии Chandler</h4>
+        <div class="session-list">
+            @foreach (var session in Model.Sessions)
+            {
+                <div class="session-item">
+                    <div>
+                        <b>@session.Ip</b>
+                        @if (session.IsCurrent) { <span class="session-current">текущая сессия</span> }
+                        <span title="@session.UserAgent">@(string.IsNullOrWhiteSpace(session.UserAgent) ? "Неизвестный браузер" : session.UserAgent)</span>
+                    </div>
+                    <form action="/settings/sessions/revoke" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="tokenId" value="@session.TokenId" />
+                        <button type="submit" class="button">Завершить</button>
+                    </form>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <h4>Настройки интерфейса</h4>
+        <form action="/settings/interface" method="post">
+            @Html.AntiForgeryToken()
+            <table class="flexible_table settings-table" cellspacing="7" cellpadding="0" border="0" align="center">
+                <tbody>
+                    <tr>
+                        <td width="145"><span class="nobold">Стиль аватаров:</span></td>
+                        <td><select name="avatarStyle">
+                            <option value="0" selected="@(Model.AvatarStyle == 0)">Произвольные (по умолчанию)</option>
+                            <option value="1" selected="@(Model.AvatarStyle == 1)">Обрезанные</option>
+                            <option value="2" selected="@(Model.AvatarStyle == 2)">Круглые</option>
+                        </select></td>
+                    </tr>
+                    <tr>
+                        <td><span class="nobold">Рейтинг:</span></td>
+                        <td><select name="showRating">
+                            <option value="true" selected="@Model.ShowRating">Показывать</option>
+                            <option value="false" selected="@(!Model.ShowRating)">Скрывать</option>
+                        </select></td>
+                    </tr>
+                    <tr><td></td><td><button type="submit" class="button">Сохранить</button></td></tr>
+                </tbody>
+            </table>
+        </form>
+    }
+</div>
